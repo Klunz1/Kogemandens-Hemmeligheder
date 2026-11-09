@@ -1,6 +1,7 @@
+using KogemandensHemmeligheder.Api.Data;
 using KogemandensHemmeligheder.Api.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace KogemandensHemmeligheder.Api.Controllers
 {
@@ -8,19 +9,29 @@ namespace KogemandensHemmeligheder.Api.Controllers
     [ApiController]
     public class RecipeController : ControllerBase
     {
-        private static readonly List<Recipe> Recipes = [];
-        private static int _nextId = 1;
+        private readonly RecipeDbContext _db;
+
+        public RecipeController(RecipeDbContext db)
+        {
+            _db = db;
+        }
 
         [HttpGet]
-        public ActionResult<List<Recipe>> GetAllRecipes()
+        public async Task<ActionResult<List<Recipe>>> GetAllRecipes()
         {
-            return Ok(Recipes);
+            var recipes = await _db.Recipes
+                .Include(recipe => recipe.Ingredients)
+                .ToListAsync();
+
+            return Ok(recipes);
         }
 
         [HttpGet("{id:int}")]
-        public ActionResult<Recipe> GetRecipeById(int id)
+        public async Task<ActionResult<Recipe>> GetRecipeById(int id)
         {
-            var recipe = Recipes.FirstOrDefault(recipe => recipe.Id == id);
+            var recipe = await _db.Recipes
+                .Include(recipe => recipe.Ingredients)
+                .FirstOrDefaultAsync(recipe => recipe.Id == id);
 
             return recipe is null
             ? NotFound()
@@ -28,10 +39,10 @@ namespace KogemandensHemmeligheder.Api.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Recipe> CreateRecipe(Recipe recipe)
+        public async Task<ActionResult<Recipe>> CreateRecipe(Recipe recipe)
         {
-            recipe.Id = _nextId++;
-            Recipes.Add(recipe);
+            _db.Recipes.Add(recipe);
+            await _db.SaveChangesAsync();
 
             return CreatedAtAction(
                 nameof(GetRecipeById),
