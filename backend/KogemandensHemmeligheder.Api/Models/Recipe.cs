@@ -1,6 +1,3 @@
-using System;
-using KogemandensHemmeligheder.Api.Models;
-
 namespace KogemandensHemmeligheder.Api.Models;
 
 public class Recipe
@@ -10,6 +7,6 @@ public class Recipe
     public string? Description { get; set; }
     public int PreparationTimeInMinutes { get; set; }
     public int CookingTimeInMinutes { get; set; }
-    public List<Ingredient> Ingredients { get; set; } = new List<Ingredient>();
-    public List<string> Instructions { get; set; } = new List<string>();
+    public List<RecipeIngredient> RecipeIngredients { get; set; } = new();
+    public List<string> Instructions { get; set; } = new();
 }

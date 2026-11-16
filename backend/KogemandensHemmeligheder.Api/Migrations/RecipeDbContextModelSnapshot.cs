@@ -26,20 +26,16 @@ namespace KogemandensHemmeligheder.Api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("Quantity")
+                    b.Property<string>("NormalizedName")
+                        .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int?>("RecipeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Unit")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RecipeId");
+                    b.HasIndex("NormalizedName")
+                        .IsUnique();
 
-                    b.ToTable("Ingredient");
+                    b.ToTable("Ingredients");
                 });
 
             modelBuilder.Entity("KogemandensHemmeligheder.Api.Models.Recipe", b =>
@@ -70,17 +66,55 @@ namespace KogemandensHemmeligheder.Api.Migrations
                     b.ToTable("Recipes");
                 });
 
-            modelBuilder.Entity("KogemandensHemmeligheder.Api.Models.Ingredient", b =>
+            modelBuilder.Entity("KogemandensHemmeligheder.Api.Models.RecipeIngredient", b =>
                 {
-                    b.HasOne("KogemandensHemmeligheder.Api.Models.Recipe", null)
-                        .WithMany("Ingredients")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("IngredientId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RecipeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Unit")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IngredientId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.ToTable("RecipeIngredients");
+                });
+
+            modelBuilder.Entity("KogemandensHemmeligheder.Api.Models.RecipeIngredient", b =>
+                {
+                    b.HasOne("KogemandensHemmeligheder.Api.Models.Ingredient", "Ingredient")
+                        .WithMany()
+                        .HasForeignKey("IngredientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("KogemandensHemmeligheder.Api.Models.Recipe", "Recipe")
+                        .WithMany("RecipeIngredients")
                         .HasForeignKey("RecipeId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Ingredient");
+
+                    b.Navigation("Recipe");
                 });
 
             modelBuilder.Entity("KogemandensHemmeligheder.Api.Models.Recipe", b =>
                 {
-                    b.Navigation("Ingredients");
+                    b.Navigation("RecipeIngredients");
                 });
 #pragma warning restore 612, 618
         }
